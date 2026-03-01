@@ -3,7 +3,24 @@
 # In a real project this would use SQLAlchemy or another ORM.
 # Kept as a plain dataclass here for demonstration purposes.
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+
+
+@dataclass
+class CandleBar:
+    timestamp: int   # Unix timestamp (seconds)
+    open: float
+    high: float
+    low: float
+    close: float
+    volume: float
+
+
+@dataclass
+class StockCandle:
+    ticker: str
+    resolution: str
+    bars: list[CandleBar] = field(default_factory=list)
 
 
 @dataclass
