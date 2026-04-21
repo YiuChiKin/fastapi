@@ -3,10 +3,7 @@ resource "helm_release" "stock_api" {
   namespace        = var.namespace
   create_namespace = true
 
-  # Pulls the chart from the GitHub Pages Helm repository (no redirect issues)
-  repository = "https://YiuChiKin.github.io/fastapi"
-  chart      = "stock-api"
-  version    = var.chart_version
+  chart = "${path.module}/../docs/stock-api-0.1.0.tgz"
 
   set_sensitive {
     name  = "secret.finnhubApiKey"
