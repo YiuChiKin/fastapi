@@ -167,3 +167,4 @@ $env:PATH += ";C:\Program Files\Docker\Docker\resources\bin"
 docker build -t localhost/stock-api:latest .
 cd terraform
 terraform apply
+kubectl port-forward svc/stock-api 8000:80
