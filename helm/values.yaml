@@ -1,0 +1,70 @@
+# Number of pod replicas
+replicaCount: 1
+
+image:
+  # Replace with your actual image repository, e.g. docker.io/yourname/stock-api
+  repository: your-dockerhub-username/stock-api
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+# Finnhub API key — override at install time:
+#   helm install stock-api ./helm --set secret.finnhubApiKey=<your_key>
+# Never commit a real key here.
+secret:
+  # Set to false to manage the Secret externally (e.g. via Sealed Secrets)
+  create: true
+  finnhubApiKey: ""
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8000
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: stock-api.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80
+
+# Extra labels applied to all resources
+commonLabels: {}
+
+# Extra annotations applied to the Deployment pods
+podAnnotations: {}
+
+# Security context for the pod
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+
+# Security context for the container
+containerSecurityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL
+
+# Node selector, tolerations, affinity (left empty for simplicity)
+nodeSelector: {}
+tolerations: []
+affinity: {}
