@@ -27,9 +27,18 @@ jobs:
         with:
           version: v3.14.0
 
+      - name: Bootstrap gh-pages branch
+        run: |
+          git ls-remote --exit-code --heads origin gh-pages \
+            || (git checkout --orphan gh-pages \
+                && git rm -rf . \
+                && git commit --allow-empty -m "Initial gh-pages branch" \
+                && git push origin gh-pages \
+                && git checkout -)
+
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.6.0
         with:
-          charts_dir: .
+          charts_dir: helm
         env:
           CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
