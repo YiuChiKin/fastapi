@@ -1,0 +1,21 @@
+apiVersion: v1
+entries:
+  stock-api:
+  - apiVersion: v2
+    appVersion: 1.0.0
+    created: "2026-04-21T23:57:12.4420801+08:00"
+    description: A Helm chart for the FastAPI Stock Market API
+    digest: 5dfcf4c31d8774f1480866859a4c7260163df383e44b8eaa1d8132873e320378
+    keywords:
+    - fastapi
+    - stocks
+    - finnhub
+    maintainers:
+    - email: your-email@example.com
+      name: your-name
+    name: stock-api
+    type: application
+    urls:
+    - https://YiuChiKin.github.io/fastapi/stock-api-0.1.0.tgz
+    version: 0.1.0
+generated: "2026-04-21T23:57:12.4404884+08:00"
