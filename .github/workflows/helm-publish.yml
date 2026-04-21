@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'helm/**'
 
 jobs:
   helm-publish:
@@ -14,8 +16,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Configure Git
         run: |
@@ -27,21 +27,47 @@ jobs:
         with:
           version: v3.14.0
 
-      - name: Bootstrap gh-pages branch
+      - name: Get chart metadata
+        id: chart
         run: |
-          git ls-remote --exit-code --heads origin gh-pages \
-            || (git checkout --orphan gh-pages \
-                && git rm -rf . \
-                && git commit --allow-empty -m "Initial gh-pages branch" \
-                && git push origin gh-pages \
-                && git checkout "$GITHUB_REF_NAME")
+          VERSION=$(grep '^version:' helm/Chart.yaml | awk '{print $2}')
+          NAME=$(grep '^name:' helm/Chart.yaml | awk '{print $2}')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "name=$NAME" >> $GITHUB_OUTPUT
+          echo "tag=$NAME-$VERSION" >> $GITHUB_OUTPUT
 
-      - name: Run chart-releaser
-        uses: helm/chart-releaser-action@v1.6.0
+      - name: Package Helm chart
+        run: mkdir -p /tmp/charts && helm package helm/ --destination /tmp/charts/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
         with:
-          charts_dir: helm
-        env:
-          CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          tag_name: ${{ steps.chart.outputs.tag }}
+          name: ${{ steps.chart.outputs.tag }}
+          files: /tmp/charts/${{ steps.chart.outputs.name }}-${{ steps.chart.outputs.version }}.tgz
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Output release URL
-        run: echo "Helm chart released at https://github.com/YiuChiKin/fastapi/releases"
+      - name: Update Helm repo index
+        run: |
+          BASE_URL="https://github.com/${{ github.repository }}/releases/download/${{ steps.chart.outputs.tag }}"
+          helm repo index /tmp/charts/ --url "$BASE_URL" --merge docs/index.yaml
+          cp /tmp/charts/index.yaml docs/index.yaml
+
+      - name: Enable GitHub Pages (docs/ on main)
+        run: |
+          curl -s -X POST \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/pages" \
+            -d '{"source":{"branch":"main","path":"/docs"}}' || true
+          curl -s -X PUT \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/pages" \
+            -d '{"source":{"branch":"main","path":"/docs"}}' || true
+
+      - name: Commit and push index.yaml
+        run: |
+          git add docs/index.yaml
+          git diff --staged --quiet || git commit -m "chore: update Helm repo index for ${{ steps.chart.outputs.tag }} [skip ci]"
+          git push

@@ -161,3 +161,5 @@ kubectl port-forward svc/stock-api 8080:80
 ```
 
 Then open: http://localhost:8080
+
+$env:Path += ";C:\terraform"
