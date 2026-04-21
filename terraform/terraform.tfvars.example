@@ -1,0 +1,7 @@
+# Copy this file to terraform.tfvars and fill in real values.
+# terraform.tfvars is gitignored and must never be committed.
+
+kube_context    = "docker-desktop"   # or "minikube"
+finnhub_api_key = "your-finnhub-api-key-here"
+image_tag       = "latest"
+namespace       = "default"

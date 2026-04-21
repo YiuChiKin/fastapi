@@ -42,3 +42,6 @@ jobs:
           charts_dir: helm
         env:
           CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Output release URL
+        run: echo "Helm chart released at https://github.com/YiuChiKin/fastapi/releases"
