@@ -163,3 +163,7 @@ kubectl port-forward svc/stock-api 8080:80
 Then open: http://localhost:8080
 
 $env:Path += ";C:\terraform"
+$env:PATH += ";C:\Program Files\Docker\Docker\resources\bin"
+docker build -t localhost/stock-api:latest .
+cd terraform
+terraform apply
